@@ -1,0 +1,53 @@
+{
+  "name": "$name",
+  "version": "1.0.0",
+  "type": "module",
+  "main": "dist/main.js",
+  "scripts": {
+    "make:routes": "node scripts/generate-routes.mjs",
+    "make:htmx": "cp node_modules/htmx.org/dist/htmx.min.js public/htmx.min.js",
+    "build:css": "npx @tailwindcss/cli -i input.css -o public/styles.css",
+    "build:js": "node scripts/build.js",
+    "build": "npx concurrently \"npm run build:css\" \"npm run build:js\" \"npm run make:htmx\"",
+    "start": "node --enable-source-maps dist/main.js",
+    "dev": "npm run make:routes ../src/routes && NODE_ENV=development npx nodemon --exec 'npm run build && node --enable-source-maps dist/main.js' -w src --ext js,jsx",
+    "add-route": "node scripts/route-template.mjs",
+    "typecheck": "npx tsc --noEmit"
+  },
+  "dependencies": {
+    "@fastify/autoload": "^6.3.1",
+    "@fastify/cookie": "^11.0.2",
+    "@fastify/cors": "^11.0.1",
+    "@fastify/formbody": "^8.0.2",
+    "@fastify/sensible": "^6.0.3",
+    "@fastify/static": "^8.2.0",
+    "@fastify/view": "^11.1.0",
+    "@tailwindcss/postcss": "^4.1.11",
+    "clsx": "^2.1.1",
+    "fastify": "^5.4.0",
+    "fastify-type-provider-zod": "^5.0.2",
+    "htmx.org": "^2.0.6",
+    "pino-pretty": "^13.0.0",
+    "prettier": "^3.6.2",
+    "rc": "^1.2.8",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+    "zod": "^4.0.5"
+  },
+  "devDependencies": {
+    "@inquirer/prompts": "^7.7.0",
+    "@tailwindcss/cli": "^4.1.11",
+    "@tailwindcss/forms": "^0.5.10",
+    "@types/date-fns": "^2.6.3",
+    "@types/node": "^24.0.15",
+    "@types/react-dom": "^19.1.6",
+    "autoprefixer": "^10.4.21",
+    "concurrently": "^9.2.0",
+    "esbuild": "^0.25.8",
+    "glob": "^11.0.3",
+    "nodemon": "^3.1.10",
+    "postcss": "^8.5.6",
+    "tailwindcss": "^4.1.11",
+    "typescript": "^5.8.3"
+  }
+}

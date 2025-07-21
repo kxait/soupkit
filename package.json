@@ -1,0 +1,17 @@
+{
+  "name": "soupkit",
+  "version": "0.0.1",
+  "bin": {
+    "create-soup": "bin/create-soup.js"
+  },
+  "scripts": {
+    "check-updates": "scripts/check-updates.sh"
+  },
+  "type": "module",
+  "dependencies": {
+    "@inquirer/prompts": "^7.7.0",
+    "fast-glob": "^3.3.3",
+    "fs-extra": "^11.3.0",
+    "uuid": "^11.1.0"
+  }
+}

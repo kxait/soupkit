@@ -1,0 +1,7 @@
+node_modules/
+dist/
+.DS_Store
+template/api/package-lock.json
+template/htmx/package-lock.json
+template/htmx/public/
+template/htmx/src/routes/index.js

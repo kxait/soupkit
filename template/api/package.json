@@ -1,0 +1,30 @@
+{
+  "name": "$name",
+  "version": "1.0.0",
+  "main": "src/main.js",
+  "type": "module",
+  "scripts": {
+    "start": "node src/main.js",
+    "dev": "NODE_ENV=development npx nodemon --exec 'npm run start' -w src",
+    "typecheck": "npx tsc --noEmit"
+  },
+  "imports": {
+    "#services/*": "./src/services/*.js",
+    "#middleware/*": "./src/middleware/*.js",
+    "#lib/*": "./src/lib/*.js"
+  },
+  "dependencies": {
+    "@fastify/autoload": "^6.3.1",
+    "assert": "^2.1.0",
+    "fastify": "^5.4.0",
+    "fastify-type-provider-zod": "^5.0.2",
+    "pino-pretty": "^13.0.0",
+    "rc": "^1.2.8",
+    "zod": "^4.0.5"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.15",
+    "nodemon": "^3.1.10",
+    "typescript": "^5.8.3"
+  }
+}

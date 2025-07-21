@@ -1,0 +1,19 @@
+{
+  "compilerOptions": {
+    "jsx": "react",
+    "moduleResolution": "node",
+    "checkJs": true,
+    "target": "ESNext",
+    "module": "ESNext",
+    "strictNullChecks": true,
+    "resolveJsonModule": true,
+    "skipLibCheck": true,
+    "baseUrl": "./src",
+    "paths": {
+      "@middleware/*": ["middleware/*"],
+      "@components/*": ["components/*"],
+      "@services/*": ["services/*"],
+      "@lib/*": ["lib/*"]
+    }
+  }
+}

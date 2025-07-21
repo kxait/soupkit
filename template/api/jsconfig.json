@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "compilerOptions": {
+    "moduleResolution": "node",
+    "checkJs": true,
+    "target": "ESNext",
+    "module": "ESNext",
+    "strictNullChecks": true,
+    "resolveJsonModule": true,
+    "skipLibCheck": true,
+    "baseUrl": "./src",
+    "outDir": "./dist",
+    "paths": {
+      "#services/*": ["services/*"],
+      "#middleware/*": ["middleware/*"],
+      "#lib/*": ["lib/*"]
+    }
+  }
+}
