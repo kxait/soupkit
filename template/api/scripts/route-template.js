@@ -5,7 +5,6 @@ import * as path from 'node:path';
 import * as prettier from 'prettier';
 
 /**
- * @typedef {'page'|'htmx fragment'|'api'} RouteType
  * @typedef {'get'|'post'|'put'|'delete'|'patch'} HttpMethod
  */
 
@@ -15,14 +14,14 @@ import * as prettier from 'prettier';
  *   in their respective files like src/routes/index.get.js and src/routes/test/data.post.js
  * - routes with params like GET /user/:id will be in src/routes/user/[id].get.js
  * - routes with params in folder name like GET /user/:id/edit will be in src/routes/user/[id]/edit.get.js
- * - routes ending with a slash will create a `index.method.jsx` file
+ * - routes ending with a slash will create a `index.method.js` file
  */
 
 const routesPaths = path.join(import.meta.dirname, '../src/routes');
 
 async function run() {
   const routePath = await inquirer.input({
-    message: 'Enter route path (e.g. /users/:id/edit)',
+    message: 'Enter route path (e.g. /users/:id/create or /users/:id/)',
     required: true,
     validate: validateRoutePath,
   });
@@ -33,34 +32,11 @@ async function run() {
     default: 'get',
   });
 
-  const routeType = await inquirer.select({
-    message: 'Select route type',
-    choices: ['page', 'htmx fragment', 'api'],
-    default: 'page',
-  });
-
-  const authenticated =
-    (await inquirer.select({
-      message: 'Is route authenticated?',
-      choices: ['yes', 'no'],
-      default: 'yes',
-    })) === 'yes';
-
   const segments = parseRoutePath(routePath);
 
-  const fsPath = routePathSegmentsToFsPath(routeType, segments, method);
+  const fsPath = routePathSegmentsToFsPath(segments, method);
 
-  const output = (() => {
-    switch (routeType) {
-      case 'api':
-        return apiTemplate(routePath, method, authenticated);
-      case 'htmx fragment':
-        return fragmentTemplate(routePath, method, authenticated);
-      case 'page':
-        return pageTemplate(routePath, method, authenticated);
-    }
-    throw 'unreachable';
-  })();
+  const output = apiTemplate(routePath, method);
 
   await ensurePathDirsExist(path.join(routesPaths, fsPath));
 
@@ -82,22 +58,9 @@ run().catch((e) => {
 /**
  * @param {string} routePath
  * @param {HttpMethod} method
- * @param {boolean} authenticated
  */
-function pageTemplate(routePath, method, authenticated) {
-  return `
-import React from "react";
-import ReactDOMServer from "react-dom/server";
-${
-  authenticated
-    ? `import verifyLogin from '@middleware/verify-login';
-`
-    : ``
-}
-
-import { di } from '@services/container';
-
-const Page = () => <div>${routePath}</div>;
+function apiTemplate(routePath, method) {
+  return `import { di } from '@services/container';
 
 /**
  * @param {import('fastify').FastifyInstance} fa
@@ -105,46 +68,6 @@ const Page = () => <div>${routePath}</div>;
 export default function (fa) {
   fa.${method}(
     "${routePath}",
-    ${authenticated ? '{ preHandler: verifyLogin },' : ''}
-    /**
-     * @param {import('fastify').FastifyRequest} request
-     * @param {import('fastify').FastifyReply} reply
-     */
-    async (request, reply) => {
-      const htmlString = ReactDOMServer.renderToString(<Page />);
-
-      reply.type("text/html; charset=utf-8");
-      return htmlString;
-    },
-  );
-  
-  fa.log.info('> Added route ${method.toUpperCase()} ${routePath}');
-}`;
-}
-
-/**
- * @param {string} routePath
- * @param {HttpMethod} method
- * @param {boolean} authenticated
- */
-function apiTemplate(routePath, method, authenticated) {
-  return `
-${
-  authenticated
-    ? `import verifyLogin from '@middleware/verify-login';
-`
-    : ``
-}
-
-import { di } from '@services/container';
-
-/**
- * @param {import('fastify').FastifyInstance} fa
- */
-export default function (fa) {
-  fa.${method}(
-    "/api${routePath}",
-    ${authenticated ? '{ preHandler: verifyLogin },' : ''}
     /**
      * @param {import('fastify').FastifyRequest} request
      * @param {import('fastify').FastifyReply} reply
@@ -155,50 +78,7 @@ export default function (fa) {
     },
   );
   
-  fa.log.info('> Added API route ${method.toUpperCase()} /api${routePath}');
-}`;
-}
-
-/**
- * @param {string} routePath
- * @param {HttpMethod} method
- * @param {boolean} authenticated
- */
-function fragmentTemplate(routePath, method, authenticated) {
-  return `
-import React from "react";
-import ReactDOMServer from "react-dom/server";
-import verifyIsHtmx from '@middleware/verify-is-htmx';
-${
-  authenticated
-    ? `import verifyLogin from '@middleware/verify-login';
-`
-    : ``
-}
-import { di } from '@services/container';
-
-const Fragment = () => <div>${routePath}</div>;
-
-/**
- * @param {import('fastify').FastifyInstance} fa
- */
-export default function (fa) {
-  fa.${method}(
-    "${routePath}.hx",
-    { preHandler: [verifyIsHtmx${authenticated ? ', verifyLogin' : ''}] },
-    /**
-     * @param {import('fastify').FastifyRequest} request
-     * @param {import('fastify').FastifyReply} reply
-     */
-    async (request, reply) => {
-      const htmlString = ReactDOMServer.renderToString(<Fragment />);
-
-      reply.type("text/html; charset=utf-8");
-      return htmlString;
-    },
-  );
-  
-  fa.log.info('> Added fragment ${method.toUpperCase()} ${routePath}.hx');
+  fa.log.info('> Added route ${method.toUpperCase()} ${routePath}');
 }`;
 }
 
@@ -225,7 +105,7 @@ function parseRoutePath(routePath) {
 
     if (part === '') {
       // perhaps an index route? e.g. `/` or `/users/` instead of `/users`
-      // should create a `index.get.jsx` file
+      // should create a `index.get.js` file
       // @ts-ignore
       const isLastSegment = i == parts.length - 1;
       if (isLastSegment) {
@@ -285,11 +165,10 @@ function validateRoutePath(routePath) {
 }
 
 /**
- * @param {RouteType} routeType
  * @param {RoutePathSegment[]} segments
  * @param {HttpMethod} httpMethod
  */
-function routePathSegmentsToFsPath(routeType, segments, httpMethod) {
+function routePathSegmentsToFsPath(segments, httpMethod) {
   const resultSegments = segments.map((segment, i) => {
     const fsName = (() => {
       if (segment.type === 'param') {
@@ -300,20 +179,10 @@ function routePathSegmentsToFsPath(routeType, segments, httpMethod) {
     })();
 
     if (i === segments.length - 1) {
-      if (routeType === 'api') {
-        return `${fsName}.${httpMethod}.js`;
-      }
-      if (routeType === 'htmx fragment') {
-        return `${fsName}.hx.${httpMethod}.jsx`;
-      }
-      return `${fsName}.${httpMethod}.jsx`;
+      return `${fsName}.${httpMethod}.js`;
     }
     return `${fsName}`;
   });
-
-  if (routeType === 'api') {
-    return ['api', ...resultSegments].join('/');
-  }
 
   return resultSegments.join('/');
 }
