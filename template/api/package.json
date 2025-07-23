@@ -24,6 +24,7 @@
     "zod": "^4.0.5"
   },
   "devDependencies": {
+    "@inquirer/prompts": "^7.7.1",
     "@types/node": "^24.0.15",
     "nodemon": "^3.1.10",
     "prettier": "^3.6.2",

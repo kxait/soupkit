@@ -1,6 +1,6 @@
 {
   "name": "soupkit",
-  "version": "0.0.1",
+  "version": "0.0.3",
   "bin": {
     "create-soup": "bin/create-soup.js"
   },
