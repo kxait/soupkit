@@ -60,6 +60,7 @@ run().catch((e) => {
  * @param {HttpMethod} method
  */
 function apiTemplate(routePath, method) {
+  const lastSegment = routePath.split('/').pop();
   return `import { di } from '#services/container';
 
 /**
@@ -67,7 +68,7 @@ function apiTemplate(routePath, method) {
  */
 export default function (fa) {
   fa.${method}(
-    "${routePath}",
+    "${lastSegment}",
     /**
      * @param {import('fastify').FastifyRequest} request
      * @param {import('fastify').FastifyReply} reply
