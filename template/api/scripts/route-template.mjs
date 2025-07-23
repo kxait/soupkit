@@ -60,7 +60,7 @@ run().catch((e) => {
  * @param {HttpMethod} method
  */
 function apiTemplate(routePath, method) {
-  return `import { di } from '@services/container';
+  return `import { di } from '#services/container';
 
 /**
  * @param {import('fastify').FastifyInstance} fa
